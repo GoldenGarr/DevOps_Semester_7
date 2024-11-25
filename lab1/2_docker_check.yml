@@ -1,0 +1,13 @@
+---
+- name: Check Docker Installation
+  hosts: app
+  tasks:
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_version_output
+      ignore_errors: yes
+
+    - name: Print Docker version
+      debug:
+        var: docker_version_output.stdout
+      when: docker_version_output.rc == 0
