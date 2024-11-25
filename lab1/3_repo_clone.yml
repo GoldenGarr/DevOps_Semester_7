@@ -6,7 +6,7 @@
     - name: Ensure git is installed
       apt:
         name: git
-        state: presentcl
+        state: present
 
     - name: Clone the repository
       git:

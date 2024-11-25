@@ -1,0 +1,98 @@
+---
+- hosts: app
+  become: true
+  roles:
+    - ansible-role-docker
+  tasks:
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_version_output
+      ignore_errors: yes
+
+    - name: Print Docker version
+      debug:
+        var: docker_version_output.stdout
+      when: docker_version_output.rc == 0
+
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+
+    - name: Clone the repository
+      git:
+        repo: https://github.com/mdn/django-locallibrary-tutorial.git
+        dest: /opt/django-locallibrary-tutorial
+        update: yes
+
+
+- name: Ensure repo was cloned
+  hosts: app
+  become: true
+  tasks:
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+
+    - name: Clone the repository
+      git:
+        repo: https://github.com/mdn/django-locallibrary-tutorial.git
+        dest: /opt/django-locallibrary-tutorial
+        update: yes
+
+- name: Setup and run Django application
+  hosts: app
+  become: true
+  vars:
+    app_path: /opt/django-locallibrary-tutorial
+  
+  tasks:
+  - name: Ansible Simple Variable Example Usage
+    debug:
+      msg: "!!!{{ app_path }}!!!"
+
+  tasks:
+    - name: Ensure Python 3 and pip are installed
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3
+        - python3-pip
+        - python3-venv
+
+    - name: Install required python packages
+      pip:
+        requirements: "{{ app_path }}/requirements.txt"
+        virtualenv: "{{ app_path }}/venv"
+        virtualenv_command: python3 -m venv
+
+    - name: Make Django migrations
+      command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py makemigrations"
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Apply Django migrations
+      command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py migrate"
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Collect static files
+      command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py collectstatic --noinput"
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Run Django tests
+      command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py test"
+
+    - name: Create Django superuser
+      command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py createsuperuser"
+      args:
+        chdir: "{{ app_path }}"
+      ignore_errors: true
+
+    - name: Start the Django application
+      command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py runserver"
+      args:
+        chdir: "{{ app_path }}"

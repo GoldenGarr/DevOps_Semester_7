@@ -1,0 +1,4 @@
+- src: https://gitlab.com/devops_roles/DevOps_Roles.git
+  scm: git
+  version: main
+  name: Docker
