@@ -1,4 +1,17 @@
 ---
+
+- name: Install openvpn
+  become: true
+  package:
+   name: "{{ item }}"
+   state: present
+  with_items:
+    - openvpn
+    -  openvpn-dco-dkms
+
+# - name: add deps
+#   command: sudo apt install openvpn-dco-dkms
+
 - name: install easy-rsa
   command: wget -P ~/ https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz
 
@@ -167,7 +180,7 @@
 
 - name: add cipher+auth
   shell: |
-    content="cipher AES-256-GCM\nauth SHA256\n";
+    content="cipher AES-256-GCM\nauth SHA256\naskpass\n";
     pattern="# Network topology";
     sudo sed -i "/$pattern/i $content" '/etc/openvpn/{{ server_name }}.conf';
 
@@ -205,4 +218,4 @@
   expect:
     command: 'sudo systemctl start openvpn@{{ server_name }}'
     responses:
-        "Private Key Password": "{{ ca_password }}"
+        "Password": "{{ ca_password }}"

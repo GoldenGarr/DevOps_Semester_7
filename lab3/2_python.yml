@@ -1,0 +1,28 @@
+---
+- hosts: all
+  # become: true
+  # pre_tasks:
+  #   # If python doesn't exist on path (type returns non-zero), install python
+  #   - name: OpenVPN | install | Install python2 if necessary
+  #     raw: 'type python >/dev/null 2>&1 || apt-get -y install python-minimal'
+  #     changed_when: false
+  tasks:
+  - name: "Build the certificate authority"
+    become: yes
+    shell: >
+      source vars;
+      ./clean-all;
+    args: 
+      chdir: "~/openvpn-ca/"
+      executable: /bin/bash
+  # - name: install python2 on all instances
+  #   hosts: "*"
+  #   gather_facts: false
+  #   tasks:
+  #     - name: run apt-get update and install python
+  #       raw: "{{ item }}"
+  #       loop:
+  #         - sudo apt-get update
+  #         - sudo apt-get -y install python
+  #       become: true
+  #       ignore_errors: true
