@@ -1,300 +1,318 @@
 ---
 
-- name: Install openvpn
-  become: true
-  package:
-   name: "{{ item }}"
-   state: present
-  with_items:
-    - openvpn
-    - openvpn-dco-dkms
 
-# - name: add deps
-#   command: sudo apt install openvpn-dco-dkms
+# - name: Install openvpn
+#   become: true
+#   package:
+#    name: "{{ item }}"
+#    state: present
+#   with_items:
+#     - openvpn
+#     - openvpn-dco-dkms
 
-- name: install easy-rsa
-  command: wget -P ~/ https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz
+# # - name: add deps
+# #   command: sudo apt install openvpn-dco-dkms
 
-- name: move easy-rsa
-  shell: cp vars.example vars
-  args:
-    chdir: '{{ openvpn_ca_dir }}'
+# - name: install easy-rsa
+#   command: wget -P ~/ https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz
 
-
-- name: "Setting openssl config file path"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_CONFIG' 
-    line: 'export KEY_CONFIG="{{ openssl_easyrsa_default_config }}"'
-
-- name: "Setting the CA properties country"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_COUNTRY' 
-    line: 'export KEY_COUNTRY="{{ openvpn_key_country }}"'
-
-- name: "Setting the CA properties province"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_PROVINCE' 
-    line: 'export KEY_PROVINCE="{{ openvpn_key_province }}"'
-
-- name: "Setting the CA properties city"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_CITY' 
-    line: 'export KEY_CITY="{{ openvpn_key_city }}"'
-
-- name: "Setting the CA properties organization"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_ORG' 
-    line: 'export KEY_ORG="{{ openvpn_key_org }}"'
-
-- name: "Setting the CA properties email"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_EMAIL' 
-    line: 'export KEY_EMAIL="{{ openvpn_key_email }}"'     
-
-- name: "Setting the CA properties OU"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_OU' 
-    line: 'export KEY_OU="Community"'     
-
-- name: "Setting the CA properties name"
-  lineinfile: 
-    path: '{{ openvpn_ca_dir }}/vars'
-    regexp: 'KEY_NAME' 
-    line: 'export KEY_NAME="{{ openvpn_key_name }}"'   
+# - name: move easy-rsa
+#   shell: cp vars.example vars
+#   args:
+#     chdir: '{{ openvpn_ca_dir }}'
 
 
-- name: OpenVPN | PKI | Generate CA password
-  shell: echo "$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c15)"
-  no_log: true
-  register: ca_password_result
-  when: ca_password is not defined
+# - name: "Setting openssl config file path"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_CONFIG' 
+#     line: 'export KEY_CONFIG="{{ openssl_easyrsa_default_config }}"'
 
-- name: OpenVPN | PKI | Set CA password variable
-  set_fact:
-    ca_password: "{{ ca_password_result.stdout }}"
-  when: ca_password is not defined
+# - name: "Setting the CA properties country"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_COUNTRY' 
+#     line: 'export KEY_COUNTRY="{{ openvpn_key_country }}"'
+
+# - name: "Setting the CA properties province"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_PROVINCE' 
+#     line: 'export KEY_PROVINCE="{{ openvpn_key_province }}"'
+
+# - name: "Setting the CA properties city"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_CITY' 
+#     line: 'export KEY_CITY="{{ openvpn_key_city }}"'
+
+# - name: "Setting the CA properties organization"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_ORG' 
+#     line: 'export KEY_ORG="{{ openvpn_key_org }}"'
+
+# - name: "Setting the CA properties email"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_EMAIL' 
+#     line: 'export KEY_EMAIL="{{ openvpn_key_email }}"'     
+
+# - name: "Setting the CA properties OU"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_OU' 
+#     line: 'export KEY_OU="Community"'     
+
+# - name: "Setting the CA properties name"
+#   lineinfile: 
+#     path: '{{ openvpn_ca_dir }}/vars'
+#     regexp: 'KEY_NAME' 
+#     line: 'export KEY_NAME="{{ openvpn_key_name }}"'   
 
 
-- name: "Start clean"
-  shell: 'yes "yes" | {{ openvpn_ca_dir }}/easyrsa clean-all'
+# - name: OpenVPN | PKI | Generate CA password
+#   shell: echo "$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c15)"
+#   no_log: true
+#   register: ca_password_result
+#   when: ca_password is not defined
+
+# - name: OpenVPN | PKI | Set CA password variable
+#   set_fact:
+#     ca_password: "{{ ca_password_result.stdout }}"
+#   when: ca_password is not defined
+
+
+# - name: "Start clean"
+#   shell: 'yes "yes" | {{ openvpn_ca_dir }}/easyrsa clean-all'
       
-- name: "Build root CA certificate"
-  shell:  'yes "yes" | ./easyrsa init-pki && yes "{{ ca_password }}" | ./easyrsa build-ca'
-  args:
-    chdir: '{{ openvpn_ca_dir }}'
+# - name: "Build root CA certificate"
+#   shell:  'yes "yes" | ./easyrsa init-pki && yes "{{ ca_password }}" | ./easyrsa build-ca'
+#   args:
+#     chdir: '{{ openvpn_ca_dir }}'
 
 
-- name: "Build CRL"
-  shell: yes "{{ ca_password }}" | ./easyrsa gen-crl
-  args:
-    chdir: '{{ openvpn_ca_dir }}'
+# - name: "Build CRL"
+#   shell: yes "{{ ca_password }}" | ./easyrsa gen-crl
+#   args:
+#     chdir: '{{ openvpn_ca_dir }}'
 
-- name: "Build server certificate"
+# - name: "Build server certificate"
 
-  expect:
-    command: './easyrsa build-server-full {{ server_name }}'
-    responses:
-      "PEM pass phrase": "{{ ca_password }}"
-      "request details": 'yes'
-      "private/ca.key": "{{ ca_password }}"
-  args:
-    chdir: '{{ openvpn_ca_dir }}'
+#   expect:
+#     command: './easyrsa build-server-full {{ server_name }}'
+#     responses:
+#       "PEM pass phrase": "{{ ca_password }}"
+#       "request details": 'yes'
+#       "private/ca.key": "{{ ca_password }}"
+#   args:
+#     chdir: '{{ openvpn_ca_dir }}'
 
-- name: "Build DH"
-  # expect:
-  #   command: ./easyrsa gen-dh
-  #   responses:
-  #     "Overwrite": 'yes'
-  #   timeout: 300 
-  shell: ./easyrsa gen-dh
-  args:
-    chdir: '{{ openvpn_ca_dir }}'
-
-
-- name: OpenVPN | PKI | Build ta.key
-  shell: openvpn --genkey --secret ta.key
-  args:
-    chdir: '{{ openvpn_ca_pki_dir }}'
+# - name: "Build DH"
+#   # expect:
+#   #   command: ./easyrsa gen-dh
+#   #   responses:
+#   #     "Overwrite": 'yes'
+#   #   timeout: 300 
+#   shell: ./easyrsa gen-dh
+#   args:
+#     chdir: '{{ openvpn_ca_dir }}'
 
 
-- name: transfer creds to etc/openvpn
-  shell: 'sudo cp {{ item }} /etc/openvpn/'
-  with_items:
-    - '{{ path_server_key_1 }}'
-    - '{{ openvpn_ca_cert }}'
-    - '{{ path_server_cert_1 }}'
-    - '{{ openvpn_hmac_firewall }}'
-    - '{{ dhparams_location }}'
-    - '{{ openvpn_crl }}'
-
-- name: "Build client certificate"
-
-  expect:
-    command: './easyrsa build-client-full {{ client_name }}'
-    responses:
-      "PEM pass phrase": "{{ ca_password }}"
-      "request details": 'yes'
-      "private/ca.key": "{{ ca_password }}"
-  args:
-    chdir: '{{ openvpn_ca_dir }}'
-
-- name: generate req for client
-  shell: 'mkdir -p {{ client_configs }} | sudo chmod -R 700 {{ client_configs }}'
-
-# - name: transfer cres to etc/openvpn
-#   shell: '  cp pki/private/client1.key ~/client-configs/keys/ /etc/openvpn/'
+# - name: OpenVPN | PKI | Build ta.key
+#   shell: openvpn --genkey --secret ta.key
+#   args:
+#     chdir: '{{ openvpn_ca_pki_dir }}'
 
 
+# - name: transfer creds to etc/openvpn
+#   shell: 'sudo cp {{ item }} /etc/openvpn/'
+#   with_items:
+#     - '{{ path_server_key_1 }}'
+#     - '{{ openvpn_ca_cert }}'
+#     - '{{ path_server_cert_1 }}'
+#     - '{{ openvpn_hmac_firewall }}'
+#     - '{{ dhparams_location }}'
+#     - '{{ openvpn_crl }}'
 
-- name: transfer creds to client_configs
-  shell: 'sudo cp {{ item }} {{ client_configs }}'
-  with_items:
-    - '{{ path_client_key_1 }}'
-    - '{{ path_client_cert_1 }}'
-    - '{{ openvpn_hmac_firewall }}'
-    - '/etc/openvpn/ca.crt'
+# - name: "Build client certificate"
 
-- name: copy server.conf
-  shell: 'sudo cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf /etc/openvpn/{{ server_name }}.conf'
+#   expect:
+#     command: './easyrsa build-client-full {{ client_name }}'
+#     responses:
+#       "PEM pass phrase": "{{ ca_password }}"
+#       "request details": 'yes'
+#       "private/ca.key": "{{ ca_password }}"
+#   args:
+#     chdir: '{{ openvpn_ca_dir }}'
 
-- name: remove semicolon from tls-auth
-  replace:
-    path: '/etc/openvpn/{{ server_name }}.conf'
-    regexp: '^;{{ item }}'
-    replace: '{{ item }}'
+# - name: generate req for client
+#   shell: 'mkdir -p {{ client_configs }} | sudo chmod -R 700 {{ client_configs }}'
 
-  with_items:
-    - 'tls-auth ta.key'
-    - 'user openvpn'
-    - 'group openvpn'
-
-
-- name: edit dh2048.pem => dh.pem
-  shell: sudo sed -i.bak 's/dh dh2048\.pem/dh dh.pem/' '/etc/openvpn/{{ server_name }}.conf'
-
-- name: add cipher+auth
-  shell: |
-    content="cipher AES-256-GCM\nauth SHA256\naskpass\n";
-    pattern="# Network topology";
-    sudo sed -i "/$pattern/i $content" '/etc/openvpn/{{ server_name }}.conf';
-
-
-- name: uncomment ip_forward
-  shell: sudo sed -i '/^#net\.ipv4\.ip_forward=1/s/^#//' "/etc/sysctl.conf"
-
-- name: debug sysctl
-  command: sudo sysctl -p
-  register: net_output
-- debug: msg="{{ net_output.stdout }}"
-
-
-- name: add openvpn rules
-  shell: |
-    content="# START OPENVPN RULES\n# NAT table rules\n*nat\n:POSTROUTING ACCEPT [0:0]\n# Allow traffic from OpenVPN client to eth0 (change to the interface you discovered!)\n-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE\nCOMMIT\n# END OPENVPN RULES\n";
-    pattern="# Don't delete these required lines, otherwise there will be errors";
-    sudo sed -i "/$pattern/i $content" '/etc/ufw/before.rules';
-
-- name: change forward policy
-  shell: sudo sed -i '/^DEFAULT_FORWARD_POLICY="DROP"$/s/DROP/ACCEPT/' "/etc/default/ufw"
-
-- name: additional port setup
-  shell: |
-    sudo ufw allow 1194/udp;
-    sudo ufw allow OpenSSH;
-    sudo ufw allow openvpn;
-    sudo ufw disable;
-    sudo ufw enable;
-
-- name: copy server conf
-  shell: 'sudo cp /etc/openvpn/{{ server_name }}.conf /etc/openvpn/server/{{ server_name }}.conf'
-
-- name: start server
-  expect:
-    command: 'sudo systemctl start openvpn@{{ server_name }}'
-    responses:
-        "Password": "{{ ca_password }}"
-
-- name: create client config dir
-  shell: 'mkdir -p {{ client_configs_files }}  | sudo chmod -R 700 {{ client_configs_base }}'
-
-- name: copy configuration file 
-  shell: "sudo cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf {{ client_configs_base }}/base.conf"
-
-
-- name: remove semicolon from base.conf
-  # shell: "sudo sed -i '/^;{{ item }} 0/s/^;//' {{ client_configs_base }}/base.conf"
-  replace:
-    path: '{{ client_configs_base }}/base.conf'
-    regexp: '^;{{ item }}'
-    replace: '{{ item }}'
-
-  with_items:
-    - 'user openvpn'
-    - 'group openvpn'
-    - 'tls-auth ta.key 1'
-
-- name: add cipher+auth
-  shell: |
-    content="cipher AES-256-GCM\nauth SHA256\nkey-direction 1\n";
-    pattern="# If a tls-auth key";
-    sudo sed -i "/$pattern/i $content" 'base.conf';
-  args:
-    chdir: '{{ client_configs_base }}'
+# # - name: transfer cres to etc/openvpn
+# #   shell: '  cp pki/private/client1.key ~/client-configs/keys/ /etc/openvpn/'
 
 
 
-- name: add methods for dns resolution
-  shell: |
-    content="; script-security 2\n; up /etc/openvpn/update-resolv-conf\n; down /etc/openvpn/update-resolv-conf\n; script-security 2\n; up /etc/openvpn/update-systemd-resolved\n; down /etc/openvpn/update-systemd-resolved\n; down-pre\n; dhcp-option DOMAIN-ROUTE .\n";
-    pattern="# If a tls-auth key";
-    sudo sed -i "/$pattern/i $content" 'base.conf';
-  args:
-    chdir: '{{ client_configs_base }}'
+# - name: transfer creds to client_configs
+#   shell: 'sudo cp {{ item }} {{ client_configs }}'
+#   with_items:
+#     - '{{ path_client_key_1 }}'
+#     - '{{ path_client_cert_1 }}'
+#     - '{{ openvpn_hmac_firewall }}'
+#     - '/etc/openvpn/ca.crt'
 
-- name: Create a file with the bash script
-  ansible.builtin.copy:
-    dest: '{{ client_configs_base }}/make_config.sh'
-    mode: '0755'
-    content: |
-        #!/bin/bash
+# - name: copy server.conf
+#   shell: 'sudo cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf /etc/openvpn/{{ server_name }}.conf'
 
-        # First argument: Client identifier
+# - name: remove semicolon from tls-auth
+#   shell: sudo sed -i '/^{{ item }} 0/s/^;//' '/etc/openvpn/{{ server_name }}.conf'
+#   with_items:
+#     - ';data-ciphers AES-256-GCM'
+#     - ';tls-auth ta.key'
+#     - ';user openvpn'
+#     - ';group openvpn'
 
-        KEY_DIR='keys'
-        OUTPUT_DIR='files'
-        BASE_CONFIG='base.conf'
 
-        touch ${OUTPUT_DIR}/${1}.ovpn;
+# - name: edit dh2048.pem => dh.pem
+#   shell: sudo sed -i.bak 's/dh dh2048\.pem/dh dh.pem/' '/etc/openvpn/{{ server_name }}.conf'
 
-        cat ${BASE_CONFIG} \
-            <(echo -e '<ca>') \
-            ${KEY_DIR}/ca.crt \
-            <(echo -e '</ca>\n<cert>') \
-            ${KEY_DIR}/${1}.crt \
-            <(echo -e '</cert>\n<key>') \
-            ${KEY_DIR}/${1}.key \
-            <(echo -e '</key>\n<tls-auth>') \
-            ${KEY_DIR}/ta.key \
-            <(echo -e '</tls-auth>') \
-            > ${OUTPUT_DIR}/${1}.ovpn
+# - name: add cipher+auth
+#   shell: |
+#     content="cipher AES-256-GCM\nauth SHA256\naskpass\n";
+#     pattern="# Network topology";
+#     sudo sed -i "/$pattern/i $content" '/etc/openvpn/{{ server_name }}.conf';
 
-- name: Create a file with the bash script
-  shell: 'chmod 700 {{ client_configs_base }}/make_config.sh'
 
-- name: Generate .ovpn
-  shell: 'sudo ./make_config.sh {{ client_name }}'
-  args:
-    chdir: '{{ client_configs_base }}'
+# - name: uncomment ip_forward
+#   shell: sudo sed -i '/^#net\.ipv4\.ip_forward=1/s/^#//' "/etc/sysctl.conf"
 
-- name: fetch .ovpn
-  fetch:
-    src: "{{ client_configs_files }}/{{ client_name }}.ovpn"
+# - name: debug sysctl
+#   command: sudo sysctl -p
+#   register: net_output
+# - debug: msg="{{ net_output.stdout }}"
+
+
+# - name: add openvpn rules
+#   shell: |
+#     content="# START OPENVPN RULES\n# NAT table rules\n*nat\n:POSTROUTING ACCEPT [0:0]\n# Allow traffic from OpenVPN client to eth0 (change to the interface you discovered!)\n-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE\nCOMMIT\n# END OPENVPN RULES\n";
+#     pattern="# Don't delete these required lines, otherwise there will be errors";
+#     sudo sed -i "/$pattern/i $content" '/etc/ufw/before.rules';
+
+# - name: change forward policy
+#   shell: sudo sed -i '/^DEFAULT_FORWARD_POLICY="DROP"$/s/DROP/ACCEPT/' "/etc/default/ufw"
+
+# - name: additional port setup
+#   shell: |
+#     sudo ufw allow 1194/udp;
+#     sudo ufw allow OpenSSH;
+#     sudo ufw allow openvpn;
+#     sudo ufw disable;
+#     sudo ufw enable;
+
+# - name: copy server conf
+#   shell: 'sudo cp /etc/openvpn/{{ server_name }}.conf /etc/openvpn/server/{{ server_name }}.conf'
+
+# - name: start server
+#   expect:
+#     command: 'sudo systemctl start openvpn@{{ server_name }}'
+#     responses:
+#         "Password": "{{ ca_password }}"
+
+# - name: create client config dir
+#   shell: 'mkdir -p {{ client_configs_files }}  | sudo chmod -R 700 {{ client_configs_base }}'
+
+# - name: copy configuration file 
+#   shell: "sudo cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf {{ client_configs_base }}/base.conf"
+
+
+# - name: remove semicolon from base.conf
+#   # shell: "sudo sed -i '/^;{{ item }} 0/s/^;//' {{ client_configs_base }}/base.conf"
+#   replace:
+#     path: '{{ client_configs_base }}/base.conf'
+#     regexp: '^;{{ item }}'
+#     replace: '{{ item }}'
+
+#   with_items:
+#     - 'user openvpn'
+#     - 'group openvpn'
+#     - 'tls-auth ta.key 1'
+
+# - name: add cipher+auth
+#   shell: |
+#     content="cipher AES-256-GCM\nauth SHA256\nkey-direction 1\n";
+#     pattern="# If a tls-auth key";
+#     sudo sed -i "/$pattern/i $content" 'base.conf';
+#   args:
+#     chdir: '{{ client_configs_base }}'
+
+
+
+# - name: add methods for dns resolution
+#   shell: |
+#     content="; script-security 2\n; up /etc/openvpn/update-resolv-conf\n; down /etc/openvpn/update-resolv-conf\n; script-security 2\n; up /etc/openvpn/update-systemd-resolved\n; down /etc/openvpn/update-systemd-resolved\n; down-pre\n; dhcp-option DOMAIN-ROUTE .\n";
+#     pattern="# If a tls-auth key";
+#     sudo sed -i "/$pattern/i $content" 'base.conf';
+#   args:
+#     chdir: '{{ client_configs_base }}'
+
+# - name: Create a file with the bash script
+#   ansible.builtin.copy:
+#     dest: '{{ client_configs_base }}/make_config.sh'
+#     mode: '0755'
+#     content: |
+#         #!/bin/bash
+
+#         # First argument: Client identifier
+
+#         KEY_DIR='keys'
+#         OUTPUT_DIR='files'
+#         BASE_CONFIG='base.conf'
+
+#         touch ${OUTPUT_DIR}/${1}.ovpn;
+
+#         cat ${BASE_CONFIG} \
+#             <(echo -e '<ca>') \
+#             ${KEY_DIR}/ca.crt \
+#             <(echo -e '</ca>\n<cert>') \
+#             ${KEY_DIR}/${1}.crt \
+#             <(echo -e '</cert>\n<key>') \
+#             ${KEY_DIR}/${1}.key \
+#             <(echo -e '</key>\n<tls-auth>') \
+#             ${KEY_DIR}/ta.key \
+#             <(echo -e '</tls-auth>') \
+#             > ${OUTPUT_DIR}/${1}.ovpn
+
+# - name: Create a file with the bash script
+#   shell: 'chmod 700 {{ client_configs_base }}/make_config.sh'
+
+# - name: Generate .ovpn
+#   shell: 'sudo ./make_config.sh {{ client_name }}'
+#   args:
+#     chdir: '{{ client_configs_base }}'
+
+
+- name: Read .ovpn file content
+  command: sudo cat /home/admin/client-configs/files/client.ovpn
+  register: foo_result
+  ignore_errors: yes
+
+- name: Write .ovpn file content to local destination
+  copy:
+    content: "{{ foo_result.stdout }}"
     dest: "{{ playbook_dir }}/{{ client_name }}.ovpn"
-    flat: yes
+  when: foo_result is succeeded
+  delegate_to: localhost
+
+
+# - name: Ensure the destination directory exists
+#   file:
+#     path: "{{ playbook_dir }}"
+#     state: directory
+#     mode: '0755'
+
+# - name: Fetch .ovpn file from remote host
+#   fetch:
+#     src: "{{ client_configs_files }}/{{ client_name }}.ovpn"
+#     dest: "{{ playbook_dir }}/"
+#     flat: yes

@@ -1,0 +1,71 @@
+# By default the DN is randomly generated and organizational mode is used.
+server_name: "server"
+client_name: "client"
+openvpn_ca_dir: "~/EasyRSA-3.0.8"
+# openvpn_ca_dir: "/etc/openvpn"
+
+openvpn_ca_pki_dir: '{{ openvpn_ca_dir }}/pki'
+
+openvpn_path_keys: "{{ openvpn_ca_pki_dir }}/private"
+openvpn_path_certs: "{{ openvpn_ca_pki_dir }}/issued"
+openvpn_path_reqs: "{{ openvpn_ca_pki_dir }}/reqs"
+openvpn_hmac_firewall: "{{ openvpn_ca_pki_dir }}/ta.key"
+openvpn_ca_cert: "{{ openvpn_ca_pki_dir }}/ca.crt"
+dhparams_location: "{{ openvpn_ca_pki_dir }}/dh.pem"
+openvpn_crl: "{{ openvpn_ca_pki_dir }}/crl.pem"
+
+
+openvpn_easyrsa_version: v3.0.6
+
+path_server_key_1: "{{ openvpn_path_keys }}/{{ server_name }}.key"
+path_server_cert_1: "{{ openvpn_path_certs }}/{{ server_name }}.crt"
+
+
+
+path_client_key_1: "{{ openvpn_path_keys }}/{{ client_name }}.key"
+path_client_cert_1: "{{ openvpn_path_certs }}/{{ client_name }}.crt"
+
+
+path_server_key: "{{ openvpn_path_keys }}/server@{{ server_name }}.key"
+path_server_cert: "{{ openvpn_path_certs }}/server@{{ server_name }}.crt"
+
+openssl_easyrsa_default_config: "~/openvpn-ca/openssl-easyrsa.cnf"
+
+
+client_configs_base: "~/client-configs"
+client_configs: "{{ client_configs_base }}/keys"
+client_configs_files: "{{ client_configs_base }}/files"
+
+
+openvpn_key_country:  "RUSSIA"
+openvpn_key_province: "SPB"
+openvpn_key_city: "SPB"
+openvpn_key_org: "none"
+openvpn_key_ou: "Community"
+openvpn_key_email: "example@gmail.com"
+openvpn_key_name: "Name"
+
+
+openvpn_key_size: "2048"
+openvpn_cipher: "AES-256-CBC"
+openvpn_auth_digest: "SHA256"
+# For all available ciphers use: openvpn --show-tls
+# For all available PFS ciphers (without eliptic curve cryptography) use: openvpn --show-tls | grep -e "-DHE-"
+# Configuration here just uses PFS ciphers leveraging AES256 and at least SHA256
+openvpn_tls_cipher: "TLS-DHE-DSS-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA256:TLS-DHE-DSS-WITH-AES-256-CBC-SHA256"
+
+
+
+openvpn_server_remote_host: "{{ inventory_hostname }}"
+local_creds_folder: "{{ playbook_dir }}/../fetched_creds/{{ openvpn_server_remote_host }}"
+
+
+openvpn_instances:
+  - {
+      proto: udp,
+      port: 1194,
+      mask: "10.9.0.0 255.255.255.0",
+      cidr: "10.9.0.0/24",
+      server_extra_options: ['push "redirect-gateway def1"'],
+      client_extra_options: [],
+  }
