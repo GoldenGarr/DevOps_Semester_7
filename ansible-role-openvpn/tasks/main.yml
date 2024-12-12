@@ -7,7 +7,7 @@
    state: present
   with_items:
     - openvpn
-    -  openvpn-dco-dkms
+    - openvpn-dco-dkms
 
 # - name: add deps
 #   command: sudo apt install openvpn-dco-dkms
@@ -165,15 +165,16 @@
   shell: 'sudo cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf /etc/openvpn/{{ server_name }}.conf'
 
 - name: remove semicolon from tls-auth
-  shell: sudo sed -i '/^{{ item }} 0/s/^;//' '/etc/openvpn/{{ server_name }}.conf'
+  replace:
+    path: '/etc/openvpn/{{ server_name }}.conf'
+    regexp: '^;{{ item }}'
+    replace: '{{ item }}'
+
   with_items:
-    - ';data-ciphers AES-256-GCM'
-    - ';tls-auth ta.key'
-    - ';user openvpn'
-    - ';group openvpn'
+    - 'tls-auth ta.key'
+    - 'user openvpn'
+    - 'group openvpn'
 
-
-# todo: cipher
 
 - name: edit dh2048.pem => dh.pem
   shell: sudo sed -i.bak 's/dh dh2048\.pem/dh dh.pem/' '/etc/openvpn/{{ server_name }}.conf'
@@ -219,3 +220,81 @@
     command: 'sudo systemctl start openvpn@{{ server_name }}'
     responses:
         "Password": "{{ ca_password }}"
+
+- name: create client config dir
+  shell: 'mkdir -p {{ client_configs_files }}  | sudo chmod -R 700 {{ client_configs_base }}'
+
+- name: copy configuration file 
+  shell: "sudo cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf {{ client_configs_base }}/base.conf"
+
+
+- name: remove semicolon from base.conf
+  # shell: "sudo sed -i '/^;{{ item }} 0/s/^;//' {{ client_configs_base }}/base.conf"
+  replace:
+    path: '{{ client_configs_base }}/base.conf'
+    regexp: '^;{{ item }}'
+    replace: '{{ item }}'
+
+  with_items:
+    - 'user openvpn'
+    - 'group openvpn'
+    - 'tls-auth ta.key 1'
+
+- name: add cipher+auth
+  shell: |
+    content="cipher AES-256-GCM\nauth SHA256\nkey-direction 1\n";
+    pattern="# If a tls-auth key";
+    sudo sed -i "/$pattern/i $content" 'base.conf';
+  args:
+    chdir: '{{ client_configs_base }}'
+
+
+
+- name: add methods for dns resolution
+  shell: |
+    content="; script-security 2\n; up /etc/openvpn/update-resolv-conf\n; down /etc/openvpn/update-resolv-conf\n; script-security 2\n; up /etc/openvpn/update-systemd-resolved\n; down /etc/openvpn/update-systemd-resolved\n; down-pre\n; dhcp-option DOMAIN-ROUTE .\n";
+    pattern="# If a tls-auth key";
+    sudo sed -i "/$pattern/i $content" 'base.conf';
+  args:
+    chdir: '{{ client_configs_base }}'
+
+- name: Create a file with the bash script
+  ansible.builtin.copy:
+    dest: '{{ client_configs_base }}/make_config.sh'
+    mode: '0755'
+    content: |
+        #!/bin/bash
+
+        # First argument: Client identifier
+
+        KEY_DIR='keys'
+        OUTPUT_DIR='files'
+        BASE_CONFIG='base.conf'
+
+        touch ${OUTPUT_DIR}/${1}.ovpn;
+
+        cat ${BASE_CONFIG} \
+            <(echo -e '<ca>') \
+            ${KEY_DIR}/ca.crt \
+            <(echo -e '</ca>\n<cert>') \
+            ${KEY_DIR}/${1}.crt \
+            <(echo -e '</cert>\n<key>') \
+            ${KEY_DIR}/${1}.key \
+            <(echo -e '</key>\n<tls-auth>') \
+            ${KEY_DIR}/ta.key \
+            <(echo -e '</tls-auth>') \
+            > ${OUTPUT_DIR}/${1}.ovpn
+
+- name: Create a file with the bash script
+  shell: 'chmod 700 {{ client_configs_base }}/make_config.sh'
+
+- name: Generate .ovpn
+  shell: 'sudo ./make_config.sh {{ client_name }}'
+  args:
+    chdir: '{{ client_configs_base }}'
+
+- name: fetch .ovpn
+  fetch:
+    src: "{{ client_configs_files }}/{{ client_name }}.ovpn"
+    dest: "{{ playbook_dir }}/{{ client_name }}.ovpn"
+    flat: yes
