@@ -54,3 +54,5 @@
       command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py runserver"
       args:
         chdir: "{{ app_path }}"
+      async: 300
+      poll: 0
