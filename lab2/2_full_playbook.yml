@@ -92,6 +92,13 @@
         chdir: "{{ app_path }}"
       ignore_errors: true
 
+    - name: Update ALLOWED_HOSTS var
+      lineinfile:
+        path: "{{ app_path }}/locallibrary/settings.py"
+        regexp: "^ALLOWED_HOSTS =.*"
+        line: "ALLOWED_HOSTS = ['84.201.185.192', 'localhost', '127.0.0.1']"
+        state: present
+        
     - name: Start the Django application
       command: "{{ app_path }}/venv/bin/python {{ app_path }}/manage.py runserver"
       args:
