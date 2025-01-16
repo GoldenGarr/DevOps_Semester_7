@@ -1,20 +1,26 @@
 ---
 
 
-- name: Install openvpn
-  become: true
-  package:
-   name: "{{ item }}"
-   state: present
-  with_items:
-    - openvpn
-    - openvpn-dco-dkms
+# - name: Install openvpn
+#   become: true
+#   package:
+#    name: "{{ item }}"
+#    state: present
+#   with_items:
+#     - openvpn
+#     - openvpn-dco-dkms
 
-# - name: add deps
-#   command: sudo apt install openvpn-dco-dkms
+# # - name: add deps
+# #   command: sudo apt install openvpn-dco-dkms
 
 - name: install easy-rsa
   command: wget -P ~/ https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz
+
+
+- name: unpack easy-rsa
+  shell: tar xvf EasyRSA-3.0.8.tgz
+  args:
+    chdir: ~
 
 - name: move easy-rsa
   shell: cp vars.example vars
@@ -86,19 +92,32 @@
 - name: "Start clean"
   shell: 'yes "yes" | {{ openvpn_ca_dir }}/easyrsa clean-all'
       
+- name: "Init pki"
+  shell:  'yes "yes" | ./easyrsa init-pki'
+  args:
+    chdir: '{{ openvpn_ca_dir }}'
+
 - name: "Build root CA certificate"
-  shell:  'yes "yes" | ./easyrsa init-pki && yes "{{ ca_password }}" | ./easyrsa build-ca'
+  expect:
+    command: './easyrsa build-ca nopass'
+    responses:
+      "PEM pass phrase": "{{ ca_password }}"
+      "Common Name": "{{ server_name }}"
   args:
     chdir: '{{ openvpn_ca_dir }}'
 
 
 - name: "Build CRL"
-  shell: yes "{{ ca_password }}" | ./easyrsa gen-crl
+  expect:
+    command: './easyrsa gen-crl'
+    responses:
+      "private/ca.key": "{{ ca_password }}"
+      # "Common Name": "{{ server_name }}"
   args:
     chdir: '{{ openvpn_ca_dir }}'
 
-- name: "Build server certificate"
 
+- name: "Build server certificate"
   expect:
     command: './easyrsa build-server-full {{ server_name }}'
     responses:
@@ -208,7 +227,13 @@
     sudo ufw allow OpenSSH;
     sudo ufw allow openvpn;
     sudo ufw disable;
-    sudo ufw enable;
+
+
+- name: enable ufw
+  expect:
+    command: 'sudo ufw enable'
+    responses:
+      "Proceed with operation": 'y'
 
 - name: copy server conf
   shell: 'sudo cp /etc/openvpn/{{ server_name }}.conf /etc/openvpn/server/{{ server_name }}.conf'

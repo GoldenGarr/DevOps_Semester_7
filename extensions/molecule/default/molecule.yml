@@ -15,7 +15,7 @@ platforms:
     user: matcai
     ssh_extra_args: "-o StrictHostKeyChecking=no"
     private_key_file: ~/.ssh/ssh_molecule_test  
-    become: true
+    # become: true
     ansible_connection: ssh  
 
 provisioner:
@@ -28,7 +28,7 @@ provisioner:
             ansible_host: 51.250.105.54
             ansible_user: matcai
             ansible_private_key_file: ~/.ssh/ssh_molecule_test
-            ansible_become: true
+            # ansible_become: true
 
 verifier:
   name: ansible
