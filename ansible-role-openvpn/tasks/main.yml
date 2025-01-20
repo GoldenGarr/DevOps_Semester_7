@@ -1,18 +1,5 @@
 ---
 
-
-# - name: Install openvpn
-#   become: true
-#   package:
-#    name: "{{ item }}"
-#    state: present
-#   with_items:
-#     - openvpn
-#     - openvpn-dco-dkms
-
-# # - name: add deps
-# #   command: sudo apt install openvpn-dco-dkms
-
 - name: install easy-rsa
   command: wget -P ~/ https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.8/EasyRSA-3.0.8.tgz
 
@@ -112,7 +99,6 @@
     command: './easyrsa gen-crl'
     responses:
       "private/ca.key": "{{ ca_password }}"
-      # "Common Name": "{{ server_name }}"
   args:
     chdir: '{{ openvpn_ca_dir }}'
 
@@ -128,11 +114,6 @@
     chdir: '{{ openvpn_ca_dir }}'
 
 - name: "Build DH"
-  # expect:
-  #   command: ./easyrsa gen-dh
-  #   responses:
-  #     "Overwrite": 'yes'
-  #   timeout: 300 
   shell: ./easyrsa gen-dh
   args:
     chdir: '{{ openvpn_ca_dir }}'
@@ -167,10 +148,6 @@
 
 - name: generate req for client
   shell: 'mkdir -p {{ client_configs }} | sudo chmod -R 700 {{ client_configs }}'
-
-# - name: transfer cres to etc/openvpn
-#   shell: '  cp pki/private/client1.key ~/client-configs/keys/ /etc/openvpn/'
-
 
 
 - name: transfer creds to client_configs

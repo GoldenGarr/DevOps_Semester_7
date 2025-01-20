@@ -2,7 +2,6 @@
 server_name: "server"
 client_name: "client"
 openvpn_ca_dir: "~/EasyRSA-3.0.8"
-# openvpn_ca_dir: "/etc/openvpn"
 
 openvpn_ca_pki_dir: '{{ openvpn_ca_dir }}/pki'
 
