@@ -1,0 +1,9 @@
+---
+locallibrary_repo_url: https://github.com/mdn/django-locallibrary-tutorial
+locallibrary_app_dir: /opt/locallibrary
+locallibrary_docker_image: timurbabs/django:latest
+locallibrary_docker_container_name: django_app
+locallibrary_version: main
+locallibrary_host_port: 8000
+locallibrary_container_port: 8000
+locallibrary_ip: 0.0.0.0

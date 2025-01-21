@@ -1,0 +1,5 @@
+---
+docker_gpg_key_url: https://download.docker.com/linux/ubuntu/gpg
+docker_source_repository: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+docker_started: true
+docker_package: docker.io

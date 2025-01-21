@@ -1,0 +1,10 @@
+- hosts: app
+  become: true
+  roles:
+    - Docker
+    - LocalLibrary
+
+- hosts: web
+  become: true
+  roles:
+    - Nginx

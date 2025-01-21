@@ -1,0 +1,37 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+
+- name: Add Docker GPG key
+  apt_key:
+    url: "{{ docker_gpg_key_url }}"
+    state: present
+  when: docker_gpg_key_url
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "{{ docker_source_repository }}"
+    state: present
+
+- name: Install Docker
+  apt:
+    name: "{{ docker_package }}"
+    state: present
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: "{{ docker_started }}"
+
+

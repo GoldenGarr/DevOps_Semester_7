@@ -1,0 +1,15 @@
+---
+- src: https://gitlab.com/myroles/Docker
+  scm: git
+  version: master
+  name: Docker
+
+- src: https://gitlab.com/myroles/Nginx
+  scm: git
+  version: master
+  name: Nginx
+
+- src: https://gitlab.com/myroles/LocalLibrary
+  scm: git
+  version: master
+  name: LocalLibrary

@@ -1,0 +1,20 @@
+---
+- name: Clone application repository
+  git:
+    repo: "{{ locallibrary_repo_url }}"
+    dest: "{{ locallibrary_app_dir }}"
+    version: "{{ locallibrary_version }}"
+    force: yes
+
+- name: Build and run Django app container
+  community.docker.docker_container:
+    name: "{{ locallibrary_docker_container_name }}"
+    image: "{{ locallibrary_docker_image }}"
+    state: started
+    ports:
+      - "{{ locallibrary_host_port }}:{{ locallibrary_container_port }}"
+    volumes:
+      - "{{ locallibrary_app_dir }}:/app"
+    command: >
+      sh -c "cd /app && pip install -r ./requirements.txt && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py collectstatic --noinput && python3 manage.py runserver {{ locallibrary_ip }}:{{ locallibrary_container_port }}"
+

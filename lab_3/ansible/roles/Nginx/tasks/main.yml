@@ -1,0 +1,17 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Ensure the cache directory exists
+  file:
+    path: "{{ nginx_cache_path }}"
+    state: directory
+
+- name: Configure Nginx
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_configure_path }}"
+  notify:
+    - Restart Nginx
