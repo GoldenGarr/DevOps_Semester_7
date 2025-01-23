@@ -1,0 +1,5 @@
+- name: Setup PostgreSQL on db-master and db-replica
+  hosts: all
+  become: true
+  roles:
+    - postgresql_role

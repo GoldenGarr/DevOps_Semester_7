@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Include the PostgreSQL role
+      ansible.builtin.include_role:
+        name: postgresql_role

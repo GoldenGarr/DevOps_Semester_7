@@ -1,0 +1,47 @@
+---
+- name: Stop PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: stopped
+
+- name: Configure postgresql.conf
+  template:
+    src: postgresql.conf.j2
+    dest: "{{ postgresql_conf_path }}"
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgresql_pg_hba_path }}"
+
+- name: Remove the "main" directory if it exists
+  ansible.builtin.file:
+    path: "{{ postgresql_data_directory }}"
+    state: absent
+
+- name: Create the "main" directory
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ postgresql_data_directory }}"
+    state: directory
+    mode: "0750"
+
+- name: Run backup
+  become_user: postgres
+  ansible.builtin.shell: >
+    pg_basebackup
+    -P
+    -R
+    -X stream
+    -c fast
+    -h {{ hostvars[postgresql_master_hostname]['ansible_host'] }}
+    -U {{ postgresql_replication_user.name }}
+    -D {{ postgresql_data_directory }}
+  environment:
+    PGPASSWORD: "{{ postgresql_replication_user.password }}"
+
+- name: Start PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+

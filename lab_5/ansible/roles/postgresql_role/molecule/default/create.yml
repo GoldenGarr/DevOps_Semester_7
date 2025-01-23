@@ -1,0 +1,60 @@
+---
+- name: Create Docker containers
+  hosts: localhost
+  tasks:
+    - name: Ensure custom Docker network exists
+      community.docker.docker_network:
+        name: molecule_network
+        driver: bridge
+
+    - name: Create db_master container
+      community.docker.docker_container:
+        name: db_master
+        image: ubuntu:focal
+        command: "tail -f /dev/null"
+        privileged: true
+        networks:
+          - name: molecule_network
+        volumes:
+          - /tmp/postgresql:/tmp/postgresql
+        env:
+          POSTGRES_PASSWORD: postgres
+        state: started
+        published_ports:
+          - "5432:5432"
+
+    - name: apt-get update in db_master
+      community.docker.docker_container_exec:
+        container: db_master
+        command: apt-get update
+
+    - name: Install Python in db_master
+      community.docker.docker_container_exec:
+        container: db_master
+        command: apt-get install -y python3
+
+    - name: Create db_replica container
+      community.docker.docker_container:
+        name: db_replica
+        image: ubuntu:focal
+        command: "tail -f /dev/null"
+        privileged: true
+        networks:
+          - name: molecule_network
+        volumes:
+          - /tmp/postgresql:/tmp/postgresql
+        env:
+          POSTGRES_PASSWORD: postgres
+        state: started
+        published_ports:
+          - "5433:5432"
+
+    - name: apt-get update in db_replica
+      community.docker.docker_container_exec:
+        container: db_replica
+        command: apt-get update
+
+    - name: Install Python in db_replica
+      community.docker.docker_container_exec:
+        container: db_replica
+        command: apt-get install -y python3

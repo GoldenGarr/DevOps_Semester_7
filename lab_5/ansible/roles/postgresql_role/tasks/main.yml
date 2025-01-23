@@ -1,0 +1,41 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Check if hostname is master
+  set_fact:
+    postgresql_is_master: "{{ inventory_hostname == postgresql_master_hostname }}"
+
+- name: Install dependency packages
+  become: true
+  apt:
+    name: 
+      - postgresql
+      - python3-pip
+      - libpq-dev
+      - sudo
+    state: present
+    update_cache: yes
+
+- name: Install psycopg2-binary
+  pip:
+    name: psycopg2-binary
+    state: present
+    executable: /usr/bin/pip
+
+- name: Ensure PostgreSQL service is started and enabled
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Setup streaming replication master
+  include_tasks: replication_master.yml
+  when: postgresql_is_master
+
+- name: Setup streaming replication replica
+  include_tasks: replication_replica.yml
+  when: not postgresql_is_master
+
+- name: Initialize databases and users
+  include_tasks: databases.yml
+  when: postgresql_is_master
+

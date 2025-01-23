@@ -1,0 +1,8 @@
+listen_addresses = '*'
+data_directory = '{{ postgresql_data_directory }}'
+hba_file = '{{ postgresql_pg_hba_path }}'
+wal_level = hot_standby
+archive_mode = on
+archive_command = 'cd .'
+max_wal_senders = 8
+hot_standby = on

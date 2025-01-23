@@ -1,0 +1,54 @@
+driver:
+  name: docker
+  options:
+    managed: true
+
+platforms:
+  - name: db_master
+    image: ubuntu:focal
+    command: "tail -f /dev/null"
+    privileged: true
+
+  - name: db_replica
+    image: ubuntu:focal
+    command: "tail -f /dev/null"
+    privileged: true
+
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      db_master:
+        ansible_host: db_master
+        ansible_user: root
+      db_replica:
+        ansible_host: db_replica
+        ansible_user: root
+    group_vars:
+      all:
+        postgresql_conf_path: "/etc/postgresql/12/main/postgresql.conf"
+        postgresql_pg_hba_path: "/etc/postgresql/12/main/pg_hba.conf"
+        postgresql_databases:
+          - name: exampledb
+            encoding: UTF8
+            owner: exampleuser
+        postgresql_users:
+          - name: exampleuser
+            password: examplepassword
+            privileges: "ALL"
+        postgresql_master_hostname: "db_master"
+        postgresql_replication_user:
+          name: replicator
+          password: replicatorpassword
+        postgresql_data_directory: "/var/lib/postgresql/12/main"
+        postgresql_postgres_password: postgres
+
+verifier:
+  name: ansible
+
+scenario:
+  name: default
+  test_sequence:
+    - create
+    - converge
+    - destroy

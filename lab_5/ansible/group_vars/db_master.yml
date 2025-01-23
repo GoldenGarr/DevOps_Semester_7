@@ -1,0 +1,9 @@
+postgresql_databases:
+  - name: exampledb
+    encoding: UTF8
+    owner: exampleuser
+
+postgresql_users:
+  - name: exampleuser
+    password: examplepassword
+    privileges: "ALL"

@@ -1,0 +1,23 @@
+---
+- name: Setup replication user
+  become_user: postgres
+  postgresql_user:
+    name: "{{ postgresql_replication_user.name }}"
+    password: "{{ postgresql_replication_user.password }}"
+    role_attr_flags: REPLICATION
+    state: present
+
+- name: Configure postgresql.conf
+  template:
+    src: postgresql.conf.j2
+    dest: "{{ postgresql_conf_path }}"
+
+- name: Configure pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgresql_pg_hba_path }}"
+
+- name: Restart PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted

@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+postgresql_conf_path: "/etc/postgresql/12/main/postgresql.conf"
+postgresql_pg_hba_path: "/etc/postgresql/12/main/pg_hba.conf"
+postgresql_databases: []
+postgresql_users: []
+postgresql_master_hostname: "srv3"
+postgresql_replication_user:
+  name: replicator
+  password: replicatorpassword
+
+postgresql_data_directory: "/var/lib/postgresql/12/main"
+postgresql_postgres_password: postgres

@@ -1,0 +1,9 @@
+db_master:
+  hosts:
+    srv3:
+      ansible_host: 192.168.56.203
+
+db_replica:
+  hosts:
+    srv4:
+      ansible_host: 192.168.56.204

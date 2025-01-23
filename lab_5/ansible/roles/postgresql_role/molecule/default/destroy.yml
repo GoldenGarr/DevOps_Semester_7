@@ -1,0 +1,20 @@
+---
+- name: Remove Docker containers
+  hosts: localhost
+  tasks:
+    - name: Remove db_master container
+      community.docker.docker_container:
+        name: db_master
+        state: absent
+        force_kill: true
+
+    - name: Remove db_replica container
+      community.docker.docker_container:
+        name: db_replica
+        state: absent
+        force_kill: true
+
+    - name: Remove Docker network
+      community.docker.docker_network:
+        name: molecule_network
+        state: absent
