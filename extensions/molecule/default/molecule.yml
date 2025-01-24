@@ -22,3 +22,13 @@ provisioner:
 
 verifier:
   name: ansible
+  
+scenario:
+  name: default
+  ## below test sequence starts with `destroy` to ensure we have clean infrastructure state.
+  test_sequence:
+    - destroy
+    - create
+    - converge
+    - verify
+    - destroy
