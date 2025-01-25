@@ -64,25 +64,28 @@
     line: 'export KEY_NAME="{{ openvpn_key_name }}"'   
 
 
-- name: OpenVPN | PKI | Generate CA password
-  shell: echo "$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c15)"
-  no_log: true
-  register: ca_password_result
-  when: ca_password is not defined
+# - name: OpenVPN | PKI | Generate CA password
+#   shell: echo "$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c15)"
+#   no_log: true
+#   register: ca_password_result
+#   when: ca_password is not defined
 
 - name: OpenVPN | PKI | Set CA password variable
   set_fact:
-    ca_password: "{{ ca_password_result.stdout }}"
+    ca_password: "{{ ca_password_result }}"
+
+    # ca_password: "{{ ca_password_result.stdout }}"
   when: ca_password is not defined
 
 
 - name: "Start clean"
   shell: 'yes "yes" | {{ openvpn_ca_dir }}/easyrsa clean-all'
-      
+
 - name: "Init pki"
   shell:  'yes "yes" | ./easyrsa init-pki'
   args:
     chdir: '{{ openvpn_ca_dir }}'
+
 
 - name: "Build root CA certificate"
   expect:
@@ -105,7 +108,7 @@
 
 - name: "Build server certificate"
   expect:
-    command: './easyrsa build-server-full {{ server_name }}'
+    command: './easyrsa build-server-full {{ server_name }} nopass'
     responses:
       "PEM pass phrase": "{{ ca_password }}"
       "request details": 'yes'
@@ -138,7 +141,7 @@
 - name: "Build client certificate"
 
   expect:
-    command: './easyrsa build-client-full {{ client_name }}'
+    command: './easyrsa build-client-full {{ client_name }} nopass'
     responses:
       "PEM pass phrase": "{{ ca_password }}"
       "request details": 'yes'
@@ -168,6 +171,7 @@
     - ';tls-auth ta.key'
     - ';user openvpn'
     - ';group openvpn'
+    # - ';'
 
 
 - name: edit dh2048.pem => dh.pem
@@ -221,6 +225,10 @@
     responses:
         "Password": "{{ ca_password }}"
 
+
+# - name: Pass
+#   debug: "Pass: '{{ ca_password }}'"
+
 - name: create client config dir
   shell: 'mkdir -p {{ client_configs_files }}  | sudo chmod -R 700 {{ client_configs_base }}'
 
@@ -258,44 +266,36 @@
   args:
     chdir: '{{ client_configs_base }}'
 
-- name: Create a file with the bash script
-  ansible.builtin.copy:
-    dest: '{{ client_configs_base }}/make_config.sh'
-    mode: '0755'
-    content: |
-        #!/bin/bash
 
-        # First argument: Client identifier
+- name: Read .ovpn file content
+  command: sudo cat '{{ client_configs }}/ca.crt'
+  register: openvpn_ca_cert
 
-        KEY_DIR='keys'
-        OUTPUT_DIR='files'
-        BASE_CONFIG='base.conf'
 
-        touch ${OUTPUT_DIR}/${1}.ovpn;
+- name: Register ta.key
+  command: sudo cat "{{ client_configs }}/ta.key"
+  register: openvpn_tls_auth
 
-        cat ${BASE_CONFIG} \
-            <(echo -e '<ca>') \
-            ${KEY_DIR}/ca.crt \
-            <(echo -e '</ca>\n<cert>') \
-            ${KEY_DIR}/${1}.crt \
-            <(echo -e '</cert>\n<key>') \
-            ${KEY_DIR}/${1}.key \
-            <(echo -e '</key>\n<tls-auth>') \
-            ${KEY_DIR}/ta.key \
-            <(echo -e '</tls-auth>') \
-            > ${OUTPUT_DIR}/${1}.ovpn
+- name: Register client keys
+  command: "sudo cat {{ client_configs }}/{{ client_name }}.key"
 
-- name: Change mod
-  shell: 'chmod 700 {{ client_configs_base }}/make_config.sh'
+  register: openvpn_client_keys
 
-- name: Generate .ovpn
-  shell: 'sudo ./make_config.sh {{ client_name }}'
-  args:
-    chdir: '{{ client_configs_base }}'
+- name: Register client certs
+  command: "sudo cat {{ client_configs }}/{{ client_name }}.crt"
+
+  register: openvpn_client_certs
+
+- name: Generate client config
+  template:
+    src: client.ovpn.j2
+    dest: "{{ client_configs }}/{{client_name}}.ovpn"
+
+    mode: '0400'
 
 
 - name: Read .ovpn file content
-  command: sudo cat '{{ client_configs_files }}/{{ client_name }}.ovpn'
+  command: sudo cat '{{ client_configs }}/{{ client_name }}.ovpn'
   register: foo_result
   ignore_errors: yes
 

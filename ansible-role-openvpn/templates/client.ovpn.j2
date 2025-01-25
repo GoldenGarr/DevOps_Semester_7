@@ -1,0 +1,60 @@
+
+client
+tls-client
+dev tun
+proto udp
+
+remote 51.250.105.67 1194
+
+resolv-retry infinite
+
+# Try to preserve some state across restarts.
+persist-key
+persist-tun
+
+# If you are connecting through an
+# HTTP proxy to reach the actual OpenVPN
+# server, put the proxy server/IP and
+# port number here.  See the man page
+# if your proxy server requires
+# authentication.
+;http-proxy-retry # retry on connection failures
+;http-proxy [proxy server] [proxy port #]
+
+# Wireless networks often produce a lot
+# of duplicate packets.  Set this flag
+# to silence duplicate packet warnings.
+;mute-replay-warnings
+
+# SSL/TLS parms.
+# See the server config file for more
+# description.  It's best to use
+# a separate .crt/.key file pair
+# for each client.  A single ca
+# file can be used for all clients.
+# ca ca.crt
+# cert client.crt
+# key client.key
+remote-cert-tls server
+
+cipher AES-256-GCM
+auth SHA256
+key-direction 1
+
+
+
+<ca>
+{{ openvpn_ca_cert.stdout }}
+</ca>
+
+<tls-auth>
+{{ openvpn_tls_auth.stdout }}
+</tls-auth>
+
+<cert>
+{{ openvpn_client_certs.stdout }}
+</cert>
+
+<key>
+{{ openvpn_client_keys.stdout }}
+</key>
