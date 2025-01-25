@@ -10,16 +10,19 @@
     name: 
       - postgresql
       - python3-pip
+      - python3-setuptools
       - libpq-dev
       - sudo
     state: present
     update_cache: yes
 
-- name: Install psycopg2-binary
-  pip:
-    name: psycopg2-binary
-    state: present
-    executable: /usr/bin/pip
+- name: Install package using Python 3.8's pip
+  command: python3.8 -m pip install psycopg2-binary
+#- name: Install psycopg2-binary
+#  pip:
+#   name: psycopg2-binary
+#    state: present
+#    executable: /usr/bin/pip
 
 - name: Ensure PostgreSQL service is started and enabled
   ansible.builtin.service:
