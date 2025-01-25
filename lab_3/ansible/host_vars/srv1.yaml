@@ -1,2 +1,2 @@
 ansible_user: vagrant
-ansible_ssh_private_key_file: ~/lab_1/.vagrant/machines/srv1/virtualbox/private_key
+ansible_ssh_private_key_file: /mnt/c/users/user/Downloads/.vagrant/machines/srv1/virtualbox/private_key
